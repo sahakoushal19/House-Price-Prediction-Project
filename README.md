@@ -11,7 +11,6 @@ This project is a web-based House Price Prediction System developed using Python
 * Scikit-learn
 * Pandas and NumPy
 * HTML and CSS
-* SQLite
 * Machine Learning
 
 ## Features
