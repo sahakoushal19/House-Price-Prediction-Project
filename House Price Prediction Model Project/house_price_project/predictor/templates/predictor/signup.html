@@ -1,0 +1,72 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up · HousePredict</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body>
+
+    <div class="background">
+        <div class="gradient-circle circle-one"></div>
+        <div class="gradient-circle circle-two"></div>
+        <div class="gradient-circle circle-three"></div>
+    </div>
+
+    <div class="container auth-container">
+
+        <header class="header">
+            <div class="brand">
+                <div class="brand-icon">🏠</div>
+                <div class="brand-text"><h2>HousePredict</h2></div>
+            </div>
+        </header>
+
+        <section class="prediction-card auth-card">
+
+            <div class="card-header">
+                <div>
+                    <h2>Create your account</h2>
+                    <p>Sign up to start predicting and saving property estimates</p>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div class="form-group auth-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <div class="input-container">
+                        {{ field }}
+                    </div>
+                    {% if field.errors %}
+                    <p class="field-error">{{ field.errors|striptags }}</p>
+                    {% endif %}
+                    {% if field.help_text %}
+                    <p class="field-help">{{ field.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="predict-button">
+                    <span>Sign Up</span>
+                    <span class="arrow">→</span>
+                </button>
+            </form>
+
+            <p class="auth-switch">
+                Already have an account? <a href="{% url 'login' %}">Log in</a>
+            </p>
+
+        </section>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,309 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body>
+
+    <div class="background">
+        <div class="gradient-circle circle-one"></div>
+        <div class="gradient-circle circle-two"></div>
+        <div class="gradient-circle circle-three"></div>
+    </div>
+
+    <div class="container">
+
+        <!-- ================= HEADER ================= -->
+        <header class="header">
+
+            <div class="brand">
+                <div class="brand-icon">🏠</div>
+                <div class="brand-text"><h2>HousePredict</h2></div>
+            </div>
+
+            <nav class="navbar">
+                <span class="welcome-text">Hi, {{ request.user.username }}</span>
+                <a href="{% url 'history' %}">My Predictions</a>
+                <a href="{% url 'logout' %}">Logout</a>
+            </nav>
+
+        </header>
+
+        <!-- ================= HERO SECTION ================= -->
+        <section class="hero">
+
+            <div class="hero-content">
+                <p class="small-title">SMART REAL ESTATE</p>
+                <h1>Predict Your <span>House Price</span></h1>
+                <p class="hero-description">
+                    Choose a country, the type of place and the exact city or
+                    village, and get a realistic market value that changes with
+                    the location and how famous it is.
+                </p>
+            </div>
+
+            <div class="house-animation">
+                <div class="house">
+                    <div class="roof"></div>
+                    <div class="house-body">
+                        <div class="window"></div>
+                        <div class="window"></div>
+                        <div class="window"></div>
+                        <div class="window"></div>
+                        <div class="door"></div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= FORM CARD ================= -->
+        <section class="prediction-card">
+
+            <div class="card-header">
+                <div>
+                    <h2>Property Details</h2>
+                    <p>Enter the details of your property</p>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="{{ form.area.id_for_label }}">Area</label>
+                        <div class="input-container">
+                            <span class="input-icon">📐</span>
+                            {{ form.area }}
+                            <span class="input-unit">sq ft</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.bedrooms.id_for_label }}">Bedrooms</label>
+                        <div class="input-container">
+                            <span class="input-icon">🛏️</span>
+                            {{ form.bedrooms }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.bathrooms.id_for_label }}">Bathrooms</label>
+                        <div class="input-container">
+                            <span class="input-icon">🛁</span>
+                            {{ form.bathrooms }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.stories.id_for_label }}">Stories</label>
+                        <div class="input-container">
+                            <span class="input-icon">🏢</span>
+                            {{ form.stories }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.parking.id_for_label }}">Parking Spaces</label>
+                        <div class="input-container">
+                            <span class="input-icon">🚗</span>
+                            {{ form.parking }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.country.id_for_label }}">Country</label>
+                        <div class="input-container">
+                            <span class="input-icon">🌍</span>
+                            {{ form.country }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.location_type.id_for_label }}">Location Type</label>
+                        <div class="input-container">
+                            <span class="input-icon">📍</span>
+                            {{ form.location_type }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.city.id_for_label }}">City / Village</label>
+                        <div class="input-container">
+                            <span class="input-icon">🏙️</span>
+                            {{ form.city }}
+                        </div>
+                    </div>
+
+                    <div class="city-info" id="city-info"></div>
+
+                </div>
+
+                {% for field in form %}
+                {% for error in field.errors %}
+                <p class="field-error">{{ field.label }}: {{ error }}</p>
+                {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <p class="field-error">{{ error }}</p>
+                {% endfor %}
+
+                <button type="submit" class="predict-button">
+                    <span class="button-icon">🔮</span>
+                    <span>Predict House Price</span>
+                    <span class="arrow">→</span>
+                </button>
+
+            </form>
+
+        </section>
+
+        <!-- ================= RESULT ================= -->
+        {% if result %}
+        <section class="result-card">
+            <div class="result-icon">{{ result.symbol }}</div>
+            <div class="result-content">
+                <p class="result-label">PREDICTED HOUSE PRICE</p>
+                <h2>{{ result.price_words }}</h2>
+                <p class="result-full">{{ result.price_full }} ({{ result.currency }})</p>
+                <p class="result-description">
+                    Likely range: {{ result.range_text }}<br>
+                    {{ result.city }}, {{ result.state }} &middot; {{ result.location_type }} &middot; {{ result.country }}.
+                    Saved to <a href="{% url 'history' %}">your prediction history</a>.
+                </p>
+
+                <div class="result-breakdown">
+                    <div class="breakdown-item">
+                        <span>Base price (ML model)</span>
+                        <strong>{{ result.base_price_full }}</strong>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>City market level</span>
+                        <strong>&times; {{ result.market_index }}</strong>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Fame: {{ result.fame_score }}/10 ({{ result.fame_label }})</span>
+                        <strong>{% if result.fame_percent >= 0 %}+{% endif %}{{ result.fame_percent }}%</strong>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Typical rate in {{ result.city }}</span>
+                        <strong>{{ result.rate_final }} / sq ft</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- ================= FOOTER ================= -->
+        <footer class="footer">
+            <div class="developer-info">
+                <div class="developed-title">Developed By</div>
+                <div class="developer-details">
+                    <div><strong>Name:</strong> Rohan Saha</div>
+                    <div><strong>Roll No:</strong> 11242692</div>
+                    <div><strong>Course:</strong> B.Tech CSE</div>
+                    <div><strong>Year:</strong> 3rd</div>
+                </div>
+            </div>
+
+            <div class="project-info">
+                <strong>House Price Prediction System</strong>
+                <span>Python • Django • Machine Learning</span>
+            </div>
+        </footer>
+
+    </div>
+
+    {{ locations_data|json_script:"locations-data" }}
+
+    <script>
+        /* ---------- Country -> Location type -> City (dependent dropdowns) ---------- */
+        (function () {
+            const DATA = JSON.parse(document.getElementById("locations-data").textContent);
+            const countrySel = document.getElementById("id_country");
+            const typeSel = document.getElementById("id_location_type");
+            const citySel = document.getElementById("id_city");
+            const info = document.getElementById("city-info");
+
+            function citiesNow() {
+                const byType = DATA.cities[countrySel.value] || {};
+                return byType[typeSel.value] || [];
+            }
+
+            function showInfo() {
+                const city = citiesNow().find(c => c.name === citySel.value);
+                info.textContent = "";
+                if (!city) { return; }
+                const symbol = DATA.currency[countrySel.value] || "";
+                const stars = "\u2605".repeat(city.fame) + "\u2606".repeat(10 - city.fame);
+
+                const line1 = document.createElement("div");
+                line1.className = "city-info-title";
+                line1.textContent = city.name + ", " + city.state;
+
+                const line2 = document.createElement("div");
+                line2.className = "city-info-meta";
+                line2.textContent = stars + "  Fame " + city.fame + "/10 (" + city.fame_label + ")"
+                    + "   \u2022   Typical rate " + symbol + " " + city.rate.toLocaleString("en-IN") + " / sq ft";
+
+                info.appendChild(line1);
+                info.appendChild(line2);
+            }
+
+            function fillCities(preferred) {
+                const list = citiesNow();
+                citySel.textContent = "";
+                list.forEach(function (c) {
+                    const opt = document.createElement("option");
+                    opt.value = c.name;
+                    opt.textContent = c.name + " \u2014 " + c.state;
+                    citySel.appendChild(opt);
+                });
+                if (preferred && list.some(c => c.name === preferred)) {
+                    citySel.value = preferred;
+                }
+                showInfo();
+            }
+
+            countrySel.addEventListener("change", function () { fillCities(); });
+            typeSel.addEventListener("change", function () { fillCities(); });
+            citySel.addEventListener("change", showInfo);
+
+            // On first load (and after a failed submit) keep the city that was chosen.
+            fillCities(citySel.value);
+        })();
+    </script>
+
+    <script>
+        const inputs = document.querySelectorAll("input, select");
+
+        inputs.forEach(input => {
+            input.addEventListener("focus", function () {
+                this.parentElement.classList.add("input-focused");
+            });
+            input.addEventListener("blur", function () {
+                this.parentElement.classList.remove("input-focused");
+            });
+        });
+
+        const button = document.querySelector(".predict-button");
+
+        if (button) {
+            button.addEventListener("click", function () {
+                this.classList.add("loading");
+                setTimeout(() => { this.classList.remove("loading"); }, 800);
+            });
+        }
+    </script>
+
+</body>
+</html>
